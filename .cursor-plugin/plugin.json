@@ -1,0 +1,6 @@
+{
+  "name": "neohive",
+  "description": "NeoHive cognitive memory for Cursor — MCP server registration, persistent rules for memory tool usage, and skills for session setup, local-to-hive memory migration, documentation design, post-session learning extraction, and smart-recall hook generation.",
+  "version": "1.0.0",
+  "author": "NeoHiveAi"
+}
