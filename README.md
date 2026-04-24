@@ -37,8 +37,8 @@ export NEOHIVE_TOKEN="your-token-here"
 | Skill | `generate-docs` | Design a documentation gold standard, save to NeoHive, validate with sample pages |
 | Skill | `generate-post-submit-hook` | Generate a tailored smart-recall hook that rewrites prompts with a small model before querying NeoHive |
 | Skill | `revise-vector-memory` | End-of-session extraction of learnings into NeoHive |
-| MCP | `securisource-neohive` | HTTP MCP server for the Securisource NeoHive |
-| MCP | `snyk-neohive` | HTTP MCP server for the Snyk NeoHive |
+
+The plugin does **not** ship a pre-configured MCP server — register your own NeoHive gateway through Cursor's MCP configuration. One server keyed with `neohive` is enough; the skills resolve it automatically.
 
 ## Repository Layout
 
@@ -46,7 +46,6 @@ export NEOHIVE_TOKEN="your-token-here"
 NeoHiveCursor/
 ├── .cursor-plugin/
 │   └── plugin.json             # Plugin manifest
-├── mcp.json                    # HTTP MCP server registration (no leading dot per Cursor spec)
 ├── rules/
 │   └── neohive.mdc             # Always-apply memory usage rule
 ├── skills/
