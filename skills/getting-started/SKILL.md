@@ -1,6 +1,6 @@
 ---
 name: getting-started
-description: First-run setup for NeoHive. Walks a new user through verifying the MCP server, setting up auth, migrating existing project memory, and enabling optional helpers. Invoke this once per machine after installing the neohive plugin.
+description: First-run setup for NeoHive. Walks a new user through verifying the MCP server, setting up auth, generating a project-specific topology block in AGENTS.md, migrating existing project memory, and enabling optional helpers. Invoke this once per machine after installing the neohive plugin.
 ---
 
 # Getting Started with NeoHive
@@ -16,8 +16,9 @@ Open with this exact script (do not paraphrase):
 > I'll walk you through setting up NeoHive on this machine. This takes 3–5 minutes and covers:
 >   1. Confirming your NeoHive server is reachable
 >   2. (Optional) Setting up your auth token
->   3. Migrating existing project knowledge into NeoHive
->   4. (Optional) Turning on the smart-recall hook
+>   3. Generating a project-specific topology block in your AGENTS.md
+>   4. Migrating existing project knowledge into NeoHive
+>   5. (Optional) Turning on the smart-recall hook
 >
 > You can stop at any point by saying "stop" or answering "skip" to a step.
 
@@ -46,7 +47,7 @@ ls ~/.cursor/plugins/local/neohive/mcp.json ~/.cursor/plugins/*/neohive/mcp.json
 grep -oE 'https?://[^"]+' ~/.cursor/plugins/local/neohive/mcp.json ~/.cursor/plugins/*/neohive/mcp.json 2>/dev/null | head -1 | awk -F: '{print $2":"$3}' | xargs -I{} curl -sS -o /dev/null -w "HTTP %{http_code}\n" --max-time 5 "{}" 2>&1 || true
 ```
 
-Then offer the user: "Fix token now", "I'll fix it later and restart Cursor", "Skip MCP setup for now". If they skip, jump to Phase 5 with a warning that memory features won't work.
+Then offer the user: "Fix token now", "I'll fix it later and restart Cursor", "Skip MCP setup for now". If they skip, jump to Phase 6 with a warning that memory features won't work.
 
 ## Phase 2 — Auth token (only if needed)
 
@@ -62,7 +63,23 @@ If `list_hives` succeeded, skip this phase. Otherwise ask: "Does your NeoHive se
 - **No — it's open**: continue.
 - **I'm not sure**: offer to try the call without a token first. If it fails, come back here.
 
-## Phase 3 — Migrate existing project memory
+## Phase 3 — Generate project AGENTS.md topology
+
+Now that the MCP is reachable, generate a project-specific topology block in `./AGENTS.md`. This is what makes the model reliable about *which* hive to query and *where* new writes should land — without it, the always-applied rule in `rules/neohive.mdc` is running blind.
+
+Ask the user:
+
+> Generate a project topology block in ./AGENTS.md? (Recommended — improves tool-calling accuracy for everyone on this repo.)
+
+- **Yes** (recommended) — invoke the `generate-agents-md` skill
+- **Yes, but let me review the table before writing** — invoke `generate-agents-md` (it has its own review gates)
+- **Skip — I'll run generate-agents-md later**
+
+If yes, invoke the `generate-agents-md` skill. The sub-skill handles its own confirmation gates (synthesis review + diff review), so this phase just waits for it to return. When it returns, report: "Topology block written to ./AGENTS.md (N hives mapped)."
+
+If skip, tell the user they can run `generate-agents-md` anytime to add the block, and continue.
+
+## Phase 4 — Migrate existing project memory
 
 Ask the user:
 
@@ -75,7 +92,7 @@ Ask the user:
 
 Wait for the migrate skill to complete. Report: "Migration done — N memories stored." Then continue.
 
-## Phase 4 — Smart-recall hook (optional, power users)
+## Phase 5 — Smart-recall hook (optional, power users)
 
 Ask:
 
@@ -85,13 +102,14 @@ Ask:
 - **Yes, set it up** — invoke the `generate-post-submit-hook` skill
 - **Tell me more first** — explain in 3–4 sentences (what it adds, what it costs, how to disable), then re-ask
 
-## Phase 5 — Final summary
+## Phase 6 — Final summary
 
 Print a checklist. Use ✓ / ○ prefixes:
 
 ```
 ✓ MCP server reachable (N hives: ...)
 ✓ Auth token configured
+✓ Project topology block in ./AGENTS.md (N hives mapped)
 ✓ N project memories migrated
 ○ Smart-recall hook (skipped — rerun generate-post-submit-hook anytime)
 ```
@@ -109,5 +127,5 @@ Then this exact closing block:
 
 - **Never call `memory_store` directly from this skill.** Delegate to `migrate-memory` or `revise-vector-memory`.
 - **Never edit the user's shell rc files yourself.** Show the command, let them paste.
-- **If the user says "stop" or "skip" at any phase, stop immediately** and print the Phase 5 summary with what's done so far.
+- **If the user says "stop" or "skip" at any phase, stop immediately** and print the Phase 6 summary with what's done so far.
 - **If any sub-skill fails, surface the error plainly** and offer to skip that phase rather than retrying silently.

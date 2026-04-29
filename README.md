@@ -16,7 +16,7 @@ ln -s "$(pwd)" ~/.cursor/plugins/local/neohive
 
 ### 2. Run the guided setup
 
-Invoke the `getting-started` skill. It walks through verifying the MCP server, setting up auth, migrating any existing project memory (`CLAUDE.md`, `AGENTS.md`, `.cursor/rules`, `.codex/rules`, `.claude/rules`) into NeoHive, and optionally generating a smart-recall hook. ~3–5 minutes.
+Invoke the `getting-started` skill. It walks through verifying the MCP server, setting up auth, generating a project-specific topology block in your `AGENTS.md`, migrating any existing project memory (`CLAUDE.md`, `AGENTS.md`, `.cursor/rules`, `.codex/rules`, `.claude/rules`) into NeoHive, and optionally generating a smart-recall hook. ~3–5 minutes.
 
 ### 3. (Optional) Environment overrides
 
@@ -33,6 +33,7 @@ export NEOHIVE_TOKEN="your-token-here"
 | Rule | `neohive.mdc` | Always-apply rule instructing the model to call `memory_context` before any task |
 | Skill | `getting-started` | First-run setup orchestrator |
 | Skill | `start` | Pre-load relevant NeoHive memories via `memory_context` |
+| Skill | `generate-agents-md` | Survey connected hives and write a project-specific topology block into `./AGENTS.md` (hive table, write-routing, session-start non-negotiables). Re-runnable when hives change. |
 | Skill | `migrate-memory` | Scan local memory files and migrate project-scoped entries into NeoHive |
 | Skill | `generate-docs` | Design a documentation gold standard, save to NeoHive, validate with sample pages |
 | Skill | `generate-post-submit-hook` | Generate a tailored smart-recall hook that rewrites prompts with a small model before querying NeoHive |
@@ -52,6 +53,7 @@ NeoHiveCursor/
 ├── skills/
 │   ├── getting-started/SKILL.md
 │   ├── start/SKILL.md
+│   ├── generate-agents-md/SKILL.md
 │   ├── migrate-memory/SKILL.md
 │   ├── generate-docs/SKILL.md
 │   ├── generate-post-submit-hook/
