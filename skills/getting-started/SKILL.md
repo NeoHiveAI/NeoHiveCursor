@@ -1,6 +1,6 @@
 ---
 name: getting-started
-description: First-run setup for NeoHive. Walks a new user through verifying the MCP server, setting up auth, migrating existing project memory, and enabling optional helpers. Invoke this once per machine after installing the neohive plugin.
+description: First-run setup for NeoHive. Walks a new user through verifying the MCP server, setting up auth, generating a project-specific topology block in AGENTS.md, migrating existing project memory, and enabling optional helpers. Invoke this once per machine after installing the neohive plugin.
 ---
 
 # Getting Started with NeoHive
