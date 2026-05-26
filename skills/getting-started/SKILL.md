@@ -16,8 +16,9 @@ Open with this exact script (do not paraphrase):
 > I'll walk you through setting up NeoHive on this machine. This takes 3–5 minutes and covers:
 >   1. Confirming your NeoHive server is reachable
 >   2. (Optional) Setting up your auth token
->   3. Migrating existing project knowledge into NeoHive
->   4. (Optional) Turning on the smart-recall hook
+>   3. Generating a project-specific topology rule at `.cursor/rules/neohive-topology.mdc`
+>   4. Migrating existing project knowledge into NeoHive
+>   5. (Optional) Turning on the smart-recall helper
 >
 > You can stop at any point by saying "stop" or answering "skip" to a step.
 
@@ -63,7 +64,7 @@ Tell the user:
 >
 > After registering, restart Cursor and rerun the `getting-started` skill.
 
-Pause here until the user confirms they've registered it, or say "skip" to jump to Phase 5.
+Pause here until the user confirms they've registered it, or say "skip" to jump to Phase 6.
 
 ### 1c. Verify with `list_hives`
 
@@ -107,7 +108,7 @@ except Exception as e:
 PY
 ```
 
-Then offer the user: "Fix token now", "I'll fix it later and restart Cursor", "Skip MCP setup for now". If they skip, jump to Phase 5 with a warning that memory features won't work.
+Then offer the user: "Fix token now", "I'll fix it later and restart Cursor", "Skip MCP setup for now". If they skip, jump to Phase 6 with a warning that memory features won't work.
 
 ## Phase 2 — Auth token (only if needed)
 
@@ -123,7 +124,18 @@ If `list_hives` succeeded, skip this phase. Otherwise ask: "Does your NeoHive se
 - **No — it's open**: continue.
 - **I'm not sure**: offer to try the call without a token first. If it fails, come back here.
 
-## Phase 3 — Migrate existing project memory
+## Phase 3 — Generate project topology rule
+
+Ask the user:
+
+> Want me to generate a project-specific NeoHive topology rule at `.cursor/rules/neohive-topology.mdc`? It surveys your connected hives, infers what each one holds, and tells future Cursor sessions where to write new memories.
+
+- **Yes** (recommended) — invoke the `generate-cursor-rules` skill
+- **Skip — I'll generate it later**
+
+Wait for the skill to complete. Report what was written. Then continue.
+
+## Phase 4 — Migrate existing project memory
 
 Ask the user:
 
@@ -136,39 +148,40 @@ Ask the user:
 
 Wait for the migrate skill to complete. Report: "Migration done — N memories stored." Then continue.
 
-## Phase 4 — Smart-recall hook (optional, power users)
+## Phase 5 — Smart-recall helper (optional, power users)
 
 Ask:
 
 > The default memory lookup passes your prompt verbatim to NeoHive. A smarter version uses a small model to rewrite the query first — usually better results, but costs a few tokens per prompt. Set it up?
 
 - **Not now** (recommended)
-- **Yes, set it up** — invoke the `generate-post-submit-hook` skill
+- **Yes, set it up** — invoke the `enable-smart-prompts` skill
 - **Tell me more first** — explain in 3–4 sentences (what it adds, what it costs, how to disable), then re-ask
 
-## Phase 5 — Final summary
+## Phase 6 — Final summary
 
 Print a checklist. Use ✓ / ○ prefixes:
 
 ```
 ✓ MCP server reachable (N hives: ...)
 ✓ Auth token configured
+✓ .cursor/rules/neohive-topology.mdc written
 ✓ N project memories migrated
-○ Smart-recall hook (skipped — rerun generate-post-submit-hook anytime)
+○ Smart-recall helper (skipped — rerun enable-smart-prompts anytime)
 ```
 
 Then this exact closing block:
 
 > **You're set. Three things to remember:**
 >   1. The `neohive.mdc` rule is always on — the model will call `memory_context` automatically before tasks.
->   2. At the start of a new session, invoke the `start` skill with a short description of what you're working on. That pre-loads extra targeted memory.
->   3. At the end of a session, invoke `revise-vector-memory` so new insights get captured.
+>   2. At the start of a new session, invoke `load-context` with a short description of what you're working on. That pre-loads extra targeted memory.
+>   3. At the end of a session, invoke `capture-session-learnings` so new insights get captured.
 >
-> When docs feel stale, try `generate-docs`. Rerun `getting-started` anytime to revisit these steps.
+> When docs feel stale, try `design-codebase-docs`. When you add/remove hives, re-run `generate-cursor-rules`. Rerun `getting-started` anytime to revisit these steps.
 
 ## Important rules
 
-- **Never call `memory_store` directly from this skill.** Delegate to `migrate-memory` or `revise-vector-memory`.
+- **Never call `memory_store` directly from this skill.** Delegate to `migrate-memory` or `capture-session-learnings`.
 - **Never edit the user's shell rc files yourself.** Show the command, let them paste.
-- **If the user says "stop" or "skip" at any phase, stop immediately** and print the Phase 5 summary with what's done so far.
+- **If the user says "stop" or "skip" at any phase, stop immediately** and print the Phase 6 summary with what's done so far.
 - **If any sub-skill fails, surface the error plainly** and offer to skip that phase rather than retrying silently.
