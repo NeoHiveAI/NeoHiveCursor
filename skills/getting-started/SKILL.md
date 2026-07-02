@@ -14,11 +14,12 @@ You are onboarding a user who has just installed the NeoHive plugin for Cursor. 
 Open with this exact script (do not paraphrase):
 
 > I'll walk you through setting up NeoHive on this machine. This takes 3–5 minutes and covers:
->   1. Confirming your NeoHive server is reachable
->   2. (Optional) Setting up your auth token
->   3. Generating a project-specific topology rule at `.cursor/rules/neohive-topology.mdc`
->   4. Migrating existing project knowledge into NeoHive
->   5. (Optional) Turning on the smart-recall helper
+>
+> 1. Confirming your NeoHive server is reachable
+> 2. (Optional) Setting up your auth token
+> 3. Generating a project-specific topology rule at `.cursor/rules/neohive-topology.mdc`
+> 4. Migrating existing project knowledge into NeoHive
+> 5. (Optional) Turning on the smart-recall helper
 >
 > You can stop at any point by saying "stop" or answering "skip" to a step.
 
@@ -70,11 +71,11 @@ Pause here until the user confirms they've registered it, or say "skip" to jump 
 
 Once a server is registered, call `list_hives` and interpret:
 
-| Outcome | What to tell the user |
-|---|---|
-| Returns hives | "Connected. I can see N hives: X, Y, Z." Proceed to Phase 2. |
-| Empty list | "Server is reachable but reports no hives. Confirm with your admin — without at least one hive, NeoHive has nowhere to store memories." Pause for user input. |
-| Tool unavailable / error | "I can't reach the NeoHive MCP server." Run the diagnostics below. |
+| Outcome                  | What to tell the user                                                                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Returns hives            | "Connected. I can see N hives: X, Y, Z." Proceed to Phase 2.                                                                                                  |
+| Empty list               | "Server is reachable but reports no hives. Confirm with your admin — without at least one hive, NeoHive has nowhere to store memories." Pause for user input. |
+| Tool unavailable / error | "I can't reach the NeoHive MCP server." Run the diagnostics below.                                                                                            |
 
 ### Diagnostics if unreachable
 
@@ -115,11 +116,13 @@ Then offer the user: "Fix token now", "I'll fix it later and restart Cursor", "S
 If `list_hives` succeeded, skip this phase. Otherwise ask: "Does your NeoHive server require a bearer token?"
 
 - **Yes — I have one** (recommended): show:
-  > Export it before launching Cursor:
-  > ```bash
-  > export NEOHIVE_TOKEN="your-token-here"
-  > ```
-  > Add that line to your shell rc (`~/.bashrc`, `~/.zshrc`, or `~/.config/fish/config.fish`) so it persists. Then restart Cursor and rerun this skill.
+    > Export it before launching Cursor:
+    >
+    > ```bash
+    > export NEOHIVE_TOKEN="your-token-here"
+    > ```
+    >
+    > Add that line to your shell rc (`~/.bashrc`, `~/.zshrc`, or `~/.config/fish/config.fish`) so it persists. Then restart Cursor and rerun this skill.
 - **Yes — I need to get one from my admin**: point them at your team's NeoHive admin, then stop.
 - **No — it's open**: continue.
 - **I'm not sure**: offer to try the call without a token first. If it fails, come back here.
@@ -173,9 +176,10 @@ Print a checklist. Use ✓ / ○ prefixes:
 Then this exact closing block:
 
 > **You're set. Three things to remember:**
->   1. The `neohive.mdc` rule is always on — the model will call `memory_context` automatically before tasks.
->   2. At the start of a new session, invoke `load-context` with a short description of what you're working on. That pre-loads extra targeted memory.
->   3. At the end of a session, invoke `capture-session-learnings` so new insights get captured.
+>
+> 1. The `neohive.mdc` rule is always on — the model will call `memory_context` automatically before tasks.
+> 2. At the start of a new session, invoke `load-context` with a short description of what you're working on. That pre-loads extra targeted memory.
+> 3. At the end of a session, invoke `capture-session-learnings` so new insights get captured.
 >
 > When docs feel stale, try `design-codebase-docs`. When you add/remove hives, re-run `generate-cursor-rules`. Rerun `getting-started` anytime to revisit these steps.
 
