@@ -37,6 +37,7 @@ Call `list_hives`. Ask which hive the helper should search on every prompt. Defa
 ### 2. Which model drives the query rewriter
 
 Options:
+
 - `claude-haiku-4-5` (Recommended) — fast + cheap
 - `claude-sonnet-4-6` — more accurate, slower, ~10x cost
 - `claude-opus-4-7` — overkill, only for very noisy hives
@@ -44,6 +45,7 @@ Options:
 ### 3. Trigger policy
 
 Options:
+
 - (Recommended) Every prompt longer than 10 chars — skips short clarifications
 - Only when prompt contains a keyword the user picks
 - Every prompt — no filtering
@@ -54,6 +56,7 @@ If "keyword": ask for the keyword(s).
 ### 4. Install location
 
 Options:
+
 - (Recommended) `~/.cursor/hooks/neohive-smart-recall.sh` — personal, all projects
 - `./.cursor/hooks/neohive-smart-recall.sh` — this project only
 - Just show me the script — I'll place it myself
@@ -61,6 +64,7 @@ Options:
 ### 5. Disable-flag name
 
 Options:
+
 - (Recommended) `NEOHIVE_SMART_DISABLED`
 - `NEOHIVE_HOOK_DISABLED`
 - Custom — user types
@@ -80,6 +84,7 @@ Generated helper with:
 
 Ask: "Install this helper now?"
 Options:
+
 - (Recommended) Yes, write it and show me the Cursor registration syntax
 - Yes, write it — I'll register it myself
 - No — I want to tweak the script first
