@@ -1,18 +1,16 @@
 ---
-name: generate-cursor-rules
-description: Generate a project-specific NeoHive topology rule at `.cursor/rules/neohive-topology.mdc` by surveying connected hives (list_hives + memory_stats + sampled memory_recall probes). Runs as Phase 3 of getting-started, and is also user-invocable for re-runs when hives change. Use when the user says "generate my NeoHive cursor rule", "regenerate the topology", "re-survey my hives", or after adding/removing/renaming hives.
+name: generate-agents-md
+description: Generate a project-specific NeoHive topology block in ./AGENTS.md by surveying connected hives (list_hives + memory_stats + sampled memory_recall probes). Runs as Phase 3 of the getting-started skill, and is also invocable on its own for re-runs when hives change. Use when the user says "generate my NeoHive AGENTS.md", "regenerate the topology", "re-survey my hives", or after adding/removing/renaming hives.
 ---
 
-# Generate Project-Specific NeoHive Topology Rule
+# Generate Project-Specific NeoHive AGENTS.md Block
 
-You are surveying the user's connected NeoHive hives and writing a **project-specific** topology rule into `.cursor/rules/neohive-topology.mdc`. This rule tells Cursor — alongside the always-apply rule shipped with this plugin — which hives exist, what each one holds, and where new writes should land. Without this rule, the generic rules in the plugin's `neohive.mdc` are running blind.
-
-> **Why `.cursor/rules/`?** Cursor reads `.cursor/rules/*.mdc` for project-level rules. Topology is project-specific (the hive list changes per project / per org), so it belongs alongside any other project rules — not inside the plugin itself.
+You are surveying the user's connected NeoHive hives and writing a **project-specific** topology block into `./AGENTS.md`. This block tells the model — at session start, before `memory_context` is even called — which hives exist, what each one holds, and where new writes should land. Without this block, the always-apply rule in `rules/neohive.mdc` is running blind.
 
 **Three non-negotiable rules:**
 
-1. **Read-only until the user confirms the diff.** Cartography, synthesis, and the proposed table are all preview-only. Do NOT write the rule file until the user explicitly approves the diff.
-2. **Marker-bounded writes only.** Generated content always lives between `<!-- BEGIN neohive-managed v=1 -->` and `<!-- END neohive-managed v=1 -->`. Never modify content outside the markers. (If you're generating a brand-new file, the markers still wrap the body — that future re-runs replace cleanly.)
+1. **Read-only until the user confirms the diff.** Cartography, synthesis, and the proposed table are all preview-only. Do NOT write `./AGENTS.md` until the user explicitly approves the diff.
+2. **Marker-bounded writes only.** Generated content always lives between `<!-- BEGIN neohive-managed v=1 -->` and `<!-- END neohive-managed v=1 -->`. Never modify content outside the markers.
 3. **Evidence-grounded synthesis.** Every column of the topology table must be traceable to `list_hives`, `memory_stats`, or sampled `memory_recall` results. When inference is uncertain, mark the cell `(verify)` rather than guess confidently.
 
 ## Three internal stages
@@ -20,8 +18,8 @@ You are surveying the user's connected NeoHive hives and writing a **project-spe
 The skill runs as three stages. Stages B and C each have one user gate; Stage A is silent unless it errors.
 
 - **Stage A — Cartography** — read-only data gathering against the NeoHive MCP.
-- **Stage B — Synthesis** — produce a draft topology rule; user reviews the table.
-- **Stage C — Write** — show diff, user confirms, write to `.cursor/rules/neohive-topology.mdc`.
+- **Stage B — Synthesis** — produce a draft topology block; user reviews the table.
+- **Stage C — Write** — show diff, user confirms, write to `./AGENTS.md`.
 
 (Stage names use letters specifically to avoid collision with `getting-started`'s "Phase N" numbering, since this skill is invoked from there.)
 
@@ -47,11 +45,11 @@ For each hive, generate 2–3 probe query strings:
 
 ### Stage A failure handling
 
-| Failure                                    | Response                                                                                                                                                     |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `list_hives` returns empty / errors        | Abort. Tell the user: "Cannot generate topology — no hives reachable. Confirm Phase 1 of `getting-started` passed before re-running." Do NOT write anything. |
-| `memory_stats` unavailable                 | Continue. Mark every hive's `Write to it?` cell `(verify)`. Surface a one-line warning at the Stage B review gate.                                           |
-| `memory_recall` returns nothing for a hive | Re-attempt with the generic fallback probes. If still empty, set `What it holds` to the hive's `description` verbatim and append `(no sampled memories)`.    |
+| Failure                                    | Response                                                                                                                                                             |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list_hives` returns empty / errors        | Abort. Tell the user: "Cannot generate topology — no hives reachable. Confirm Phase 1 of the getting-started skill passed before re-running." Do NOT write anything. |
+| `memory_stats` unavailable                 | Continue. Mark every hive's `Write to it?` cell `(verify)`. Surface a one-line warning at the Stage B review gate.                                                   |
+| `memory_recall` returns nothing for a hive | Re-attempt with the generic fallback probes. If still empty, set `What it holds` to the hive's `description` verbatim and append `(no sampled memories)`.            |
 
 ## Stage B — Synthesis
 
@@ -72,13 +70,15 @@ Pick the hive with the largest write-safe (`YES`) memory count. Tie-break alphab
 
 ### Stage B review gate
 
-Render the proposed table to the terminal as a markdown table (so the user can read it). Then ask:
+Render the proposed table to the terminal as a markdown table (so the user can read it). Then ask the user:
 
 > Topology table looks right?
-> Options: Looks good — proceed to write / Edit a row / Re-sample with different probes / Cancel
+>
+> - **Looks good — proceed to write** (recommended)
+> - **Edit a row** — name the row + column, accept free-text override, re-render and re-confirm
+> - **Re-sample with different probes** — ask for probe terms, re-run A.3 only, re-synthesize
+> - **Cancel** — exit cleanly, no file writes
 
-`Edit a row` → ask which row + which column → accept free-text override → re-render and re-confirm.
-`Re-sample with different probes` → ask user for probe terms → re-run A.3 only → re-synthesize.
 `Cancel` → exit cleanly. No file writes.
 
 ## Stage C — Write
@@ -88,22 +88,22 @@ Render the proposed table to the terminal as a markdown table (so the user can r
 If the target file is in a git worktree:
 
 ```bash
-if git -C "$(dirname .cursor/rules/neohive-topology.mdc)" rev-parse --is-inside-work-tree 2>/dev/null; then
-  if [ -n "$(git status --porcelain -- .cursor/rules/neohive-topology.mdc)" ]; then
-    # warn + ask whether to continue or cancel
+if git -C "$(dirname ./AGENTS.md)" rev-parse --is-inside-work-tree 2>/dev/null; then
+  if [ -n "$(git status --porcelain -- ./AGENTS.md)" ]; then
+    # warn + ask user to confirm or cancel
   fi
 fi
 ```
 
-Warning text: "`.cursor/rules/neohive-topology.mdc` has uncommitted changes — recommend committing first so this skill's diff is easy to review separately. Continue?" Do not auto-commit. If `rev-parse` fails (not a git repo), skip the check silently.
+Warning text: "`AGENTS.md` has uncommitted changes — recommend committing first so this skill's diff is easy to review separately. Continue?" Do not auto-commit. If `rev-parse` fails (not a git repo), skip the check silently.
 
 ### Write-behavior matrix
 
-| Existing target file state                                     | Action                                                                                                                                                                  |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| File absent                                                    | Create `.cursor/rules/neohive-topology.mdc` containing the frontmatter + marker block.                                                                                  |
-| File present with `<!-- BEGIN neohive-managed v=N -->` markers | Replace content between markers; preserve everything outside (including the user's frontmatter overrides if they edited them). Update `v=N` to current version (`v=1`). |
-| File present without markers                                   | Treat the existing file as user-owned; rename it to `.bak` and create a fresh managed file. Warn the user.                                                              |
+| Existing `./AGENTS.md` state                                   | Action                                                                                                 |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| File absent                                                    | Create `./AGENTS.md` containing only the marker block.                                                 |
+| File present with `<!-- BEGIN neohive-managed v=N -->` markers | Replace content between markers; preserve everything outside. Update `v=N` to current version (`v=1`). |
+| File present without markers                                   | Append the marker block to end-of-file. Preserves user-authored content at the top.                    |
 
 **v1 upgrade behavior:** any existing block, regardless of `v=`, is replaced wholesale. v1 does not implement format-aware migration.
 
@@ -111,31 +111,31 @@ Warning text: "`.cursor/rules/neohive-topology.mdc` has uncommitted changes — 
 
 1. Compute proposed file content in memory.
 2. Allocate temp file via `mktemp` in `$TMPDIR` (NOT in the project worktree). Register a cleanup trap so the temp file is removed on any exit path including SIGINT.
-3. Run `diff -u .cursor/rules/neohive-topology.mdc "$tmp"` (treat absent file as `/dev/null`); print the unified diff to terminal.
-4. Ask: "Write this rule to .cursor/rules/neohive-topology.mdc?"
-   Options: Write / Edit block first / Cancel
-5. `Write` → ensure `.cursor/rules/` exists, then atomic `mv "$tmp" .cursor/rules/neohive-topology.mdc`. `Edit block first` → spawn `$EDITOR` on `$tmp` → re-show diff → re-confirm. `Cancel` → cleanup trap fires, exit.
+3. Run `diff -u AGENTS.md "$tmp"` (treat absent `AGENTS.md` as `/dev/null`); print the unified diff to terminal.
+4. Ask the user:
+    > Write this block to ./AGENTS.md?
+    >
+    > - **Write** (recommended)
+    > - **Edit block first** — spawn `$EDITOR` on the temp file, re-show diff, re-confirm
+    > - **Cancel** — cleanup trap fires, exit
+5. `Write` → atomic `mv "$tmp" ./AGENTS.md`.
 
 ## Generated content template
 
-Always wrap the body in markers. The `.mdc` frontmatter is fixed; the body is templated.
+Always wrap in markers. Use these substitution variables; fill them from Stage B output.
 
 ```markdown
----
-description: NeoHive project topology — which hives exist, what they hold, where to write
-alwaysApply: true
----
-
 <!-- BEGIN neohive-managed v=1 -->
-<!-- Generated by NeoHive generate-cursor-rules on {{DATE}}. Re-run to refresh. -->
+<!-- Generated by the generate-agents-md skill on {{DATE}}. Re-run to refresh. -->
 
-# NeoHive Cognitive Memory — Project Topology
+## NeoHive Cognitive Memory — Project Topology
 
-Generic NeoHive tool-usage rules are loaded from the plugin's `rules/neohive.mdc`.
-This rule adds the **project-specific** topology and routing that determine
-WHICH hive serves which query, and where new writes should land.
+Generic NeoHive tool-usage rules are loaded from the plugin rule `neohive.mdc`
+(always-applied in Cursor). This block adds the **project-specific** topology
+and routing that determine WHICH hive serves which query, and where new writes
+should land.
 
-## Hive Topology
+### Hive Topology
 
 | Hive (UUID) | Name | Type | Embedding model | What it holds | Write to it? |
 | ----------- | ---- | ---- | --------------- | ------------- | ------------ |
@@ -146,22 +146,22 @@ WHICH hive serves which query, and where new writes should land.
 
 **Interpreting `[hive: <uuid>]` in recall results.** {{HIVE_PROVENANCE_GUIDE}}
 
-## Session Start — Non-Negotiable (Project-Specific)
+### Session Start — Non-Negotiable (Project-Specific)
 
-1. `memory_context` is your FIRST action — see the plugin's `rules/neohive.mdc`.
+1. `memory_context` is your FIRST action — see `neohive.mdc`.
 2. Confirm the topology above has not drifted: call `list_hives` once per session.
-   If a hive is added / removed / renamed, re-run `generate-cursor-rules`.
+   If a hive is added / removed / renamed, re-run the `generate-agents-md` skill.
 3. Follow up with a targeted `memory_recall` for this project's domain. Suggested seeds:
    {{DOMAIN_RECALL_SEEDS}}
 
-## What Goes Where: Cognitive Memory vs Cursor Rules
+### What Goes Where: Cognitive Memory vs AGENTS.md
 
-| Store in **Cognitive Memory** | Store in **`.cursor/rules/*.mdc`** |
-| ----------------------------- | ---------------------------------- |
+| Store in **Cognitive Memory** | Store in **AGENTS.md** |
+| ----------------------------- | ---------------------- |
 
 {{ROUTING_TABLE}}
 
-## Hive routing for writes
+### Hive routing for writes
 
 Writes default to **{{DEFAULT_WRITE_HIVE}}** — {{DEFAULT_WRITE_RATIONALE}}.
 **Do not pass an explicit `hive` parameter to `memory_store` unless you have a
@@ -191,8 +191,8 @@ specific reason.** When you do, write one sentence in the memory body explaining
 Print a single line:
 
 ```
-generate-cursor-rules: 3 hives mapped, default write target: Knowledge,
-written to .cursor/rules/neohive-topology.mdc (+35 lines vs previous version).
+generate-agents-md: 3 hives mapped, default write target: Knowledge,
+written to ./AGENTS.md (block lines 42-87, +35 lines vs previous version).
 ```
 
 When replacing an existing block, additionally report **only changed rows**:
@@ -210,15 +210,14 @@ If nothing changed: `Topology changes: none — block already up to date.`
 | Mistake                                             | Fix                                                                                                                                               |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Writing the file before Stage C diff confirmation   | Cartography and synthesis are read-only. The first write is after the user picks `Write` at the diff gate.                                        |
-| Modifying content outside the marker block          | Markers are a hard boundary. Anything outside `<!-- BEGIN ... -->` / `<!-- END ... -->` is user-owned (including the `.mdc` frontmatter).         |
+| Modifying content outside the marker block          | Markers are a hard boundary. Anything outside `<!-- BEGIN ... -->` / `<!-- END ... -->` is user-owned.                                            |
 | Confidently guessing embedding model from hive name | When uncertain, mark `(verify)`. The user fixes it once; the next regeneration preserves their override only if they keep the row content stable. |
 | Inferring write-policy from hive description alone  | `memory_stats` is the load-bearing signal. If it's unavailable, mark `(verify)` everywhere — do NOT fall back to description-only inference.      |
 | Putting the temp file in the project worktree       | Use `mktemp` in `$TMPDIR`. Otherwise the temp file shows up in `git status` mid-run and can be accidentally committed.                            |
-| Overwriting an unmarked existing topology file      | If the file exists without markers, treat it as user-owned: rename to `.bak`, write fresh, warn.                                                  |
 
 ## Important rules
 
-- **NEVER write the rule file before the diff-and-confirm gate completes.**
+- **NEVER write `./AGENTS.md` before the diff-and-confirm gate completes.**
 - **NEVER touch content outside the marker block.** Idempotent re-runs depend on this.
 - **NEVER skip the synthesis review gate.** The table is the highest-leverage artifact this skill produces; if it's wrong, everything downstream is wrong.
 - **NEVER auto-commit.** The user owns commit timing.
