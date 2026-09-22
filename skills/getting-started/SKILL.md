@@ -52,8 +52,8 @@ for line in found or ["no neohive MCP found"]:
 PY
 ```
 
-- **If one is found:** call `list_hives` and interpret per the table below.
-- **If none is found:** guide the user to register one (see 1b), then rerun `list_hives`.
+- **If one is found:** call `list_indexes` and interpret per the table below.
+- **If none is found:** guide the user to register one (see 1b), then rerun `list_indexes`.
 
 ### 1b. Registering a server (only if none found)
 
@@ -61,21 +61,21 @@ Tell the user:
 
 > The NeoHive plugin doesn't bundle a default MCP server — you register yours explicitly through Cursor's MCP configuration (Cursor Settings → MCP, or the equivalent on your platform).
 >
-> Name the server with a key containing `neohive` (e.g. `neohive`) and point it at your gateway URL (e.g. `https://your-neohive-host/hiveminds/<hive-id>/mcp`). See the [Cursor plugin docs](https://cursor.com/docs/plugins) for the exact configuration path.
+> Name the server with a key containing `neohive` (e.g. `neohive`) and point it at your gateway URL (e.g. `https://your-neohive-host/hives/<hive-id>/mcp`). See the [Cursor plugin docs](https://cursor.com/docs/plugins) for the exact configuration path.
 >
 > After registering, restart Cursor and rerun the `getting-started` skill.
 
 Pause here until the user confirms they've registered it, or say "skip" to jump to Phase 6.
 
-### 1c. Verify with `list_hives`
+### 1c. Verify with `list_indexes`
 
-Once a server is registered, call `list_hives` and interpret:
+Once a server is registered, call `list_indexes` and interpret:
 
-| Outcome                  | What to tell the user                                                                                                                                         |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Returns hives            | "Connected. I can see N hives: X, Y, Z." Proceed to Phase 2.                                                                                                  |
-| Empty list               | "Server is reachable but reports no hives. Confirm with your admin — without at least one hive, NeoHive has nowhere to store memories." Pause for user input. |
-| Tool unavailable / error | "I can't reach the NeoHive MCP server." Run the diagnostics below.                                                                                            |
+| Outcome                  | What to tell the user                                                                                                                                            |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Returns Indexes          | "Connected. I can see N Indexes: X, Y, Z." Proceed to Phase 2.                                                                                                   |
+| Empty list               | "Server is reachable but reports no indexes. Confirm with your admin — without at least one Index, NeoHive has nowhere to store memories." Pause for user input. |
+| Tool unavailable / error | "I can't reach the NeoHive MCP server." Run the diagnostics below.                                                                                               |
 
 ### Diagnostics if unreachable
 
@@ -113,7 +113,7 @@ Then offer the user: "Fix token now", "I'll fix it later and restart Cursor", "S
 
 ## Phase 2 — Auth token (only if needed)
 
-If `list_hives` succeeded, skip this phase. Otherwise ask: "Does your NeoHive server require a bearer token?"
+If `list_indexes` succeeded, skip this phase. Otherwise ask: "Does your NeoHive server require a bearer token?"
 
 - **Yes — I have one** (recommended): show:
     > Export it before launching Cursor:
@@ -131,7 +131,7 @@ If `list_hives` succeeded, skip this phase. Otherwise ask: "Does your NeoHive se
 
 Ask the user:
 
-> Want me to generate a project-specific NeoHive topology rule at `.cursor/rules/neohive-topology.mdc`? It surveys your connected hives, infers what each one holds, and tells future Cursor sessions where to write new memories.
+> Want me to generate a project-specific NeoHive topology rule at `.cursor/rules/neohive-topology.mdc`? It surveys your connected Indexes, infers what each one holds, and tells future Cursor sessions where to write new memories.
 
 - **Yes** (recommended) — invoke the `generate-cursor-rules` skill
 - **Skip — I'll generate it later**
@@ -166,7 +166,7 @@ Ask:
 Print a checklist. Use ✓ / ○ prefixes:
 
 ```
-✓ MCP server reachable (N hives: ...)
+✓ MCP server reachable (N indexes: ...)
 ✓ Auth token configured
 ✓ .cursor/rules/neohive-topology.mdc written
 ✓ N project memories migrated
@@ -181,7 +181,7 @@ Then this exact closing block:
 > 2. At the start of a new session, invoke `load-context` with a short description of what you're working on. That pre-loads extra targeted memory.
 > 3. At the end of a session, invoke `capture-session-learnings` so new insights get captured.
 >
-> When docs feel stale, try `design-codebase-docs`. When you add/remove hives, re-run `generate-cursor-rules`. Rerun `getting-started` anytime to revisit these steps.
+> When docs feel stale, try `design-codebase-docs`. When you add/remove Indexes, re-run `generate-cursor-rules`. Rerun `getting-started` anytime to revisit these steps.
 
 ## Important rules
 

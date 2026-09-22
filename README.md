@@ -1,6 +1,9 @@
 # NeoHiveCursor
 
-A Cursor plugin for the [NeoHive](https://github.com/NeoHiveAi) cognitive memory system. Install this plugin to wire Cursor into any NeoHive MCP server — persistent semantic memory across sessions, an always-apply rule that enforces memory tool usage, and skills for session setup, memory migration, documentation design, and post-session learning extraction.
+A Cursor plugin for the [NeoHive](https://neohive.ai) cognitive memory system. Install this plugin to wire Cursor into any NeoHive MCP server — persistent semantic memory across sessions, an always-apply rule that enforces memory tool usage, and skills for session setup, memory migration, documentation design, and post-session learning extraction.
+
+> **[NeoHive](https://neohive.ai)** — the context engineering layer for AI coding agents.
+> Official site: **[neohive.ai](https://neohive.ai)** · Docs: **[docs.neohive.ai](https://docs.neohive.ai)**
 
 ## Quick Start
 
@@ -39,7 +42,7 @@ export NEOHIVE_MCP_HINTS=0
 | Rule  | `rules/neohive.mdc`         | Always-apply rule: when to call `memory_context` / `memory_recall` / `memory_store`, recall-first guidance for codebase exploration, prose-encoded guidance for delegated exploration (the Cursor analogue of Claude's `explore-neohive` subagent + PreToolUse hook). |
 | Skill | `getting-started`           | First-run setup orchestrator: verifies MCP, sets up auth, generates topology rule, migrates memory, surfaces next steps.                                                                                                                                              |
 | Skill | `load-context`              | Pre-load relevant NeoHive memories via `memory_context`. Run at the start of every session.                                                                                                                                                                           |
-| Skill | `generate-cursor-rules`     | Survey connected hives and write a project-specific topology rule at `.cursor/rules/neohive-topology.mdc`. Re-runnable when hives change.                                                                                                                             |
+| Skill | `generate-cursor-rules`     | Survey connected Indexes and write a project-specific topology rule at `.cursor/rules/neohive-topology.mdc`. Re-runnable when Indexes change.                                                                                                                         |
 | Skill | `migrate-memory`            | Scan local memory files (`CLAUDE.md`, `AGENTS.md`, `.cursor/rules`, `.codex/rules`, `.claude/rules`) and migrate project-scoped entries into NeoHive.                                                                                                                 |
 | Skill | `design-codebase-docs`      | Design a documentation gold standard through a guided dialogue, save to NeoHive, validate with 2–3 sample pages, then hand off to a fresh session.                                                                                                                    |
 | Skill | `enable-smart-prompts`      | Generate a tailored prompt-rewriting helper that rewrites prompts with a small model before querying NeoHive. Cursor hook-wiring is platform-dependent — see the skill for current guidance.                                                                          |
@@ -90,3 +93,10 @@ Cursor requires open-source plugins and a manual review step. Load the plugin lo
 ## Versioning
 
 Bump `version` in `.cursor-plugin/plugin.json` on every change — without a bump, installed users may not see updates. Restart Cursor after edits to a local plugin so it picks up changes.
+
+## About NeoHive
+
+[**NeoHive**](https://neohive.ai) is the one shared memory layer that runs entirely on your own infrastructure, works across every AI agent your team uses, and remembers what your team learns — not just what's in the code.
+
+- 🌐 [neohive.ai](https://neohive.ai)
+- 📚 [docs.neohive.ai](https://docs.neohive.ai)
